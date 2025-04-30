@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="512" height="512" viewBox="0 0 512 512" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <!-- 背景圆形 -->
+  <circle cx="256" cy="256" r="256" fill="#1976D2"/>
+  
+  <!-- 文字 "OA" -->
+  <text x="256" y="320" 
+        font-family="Arial, sans-serif" 
+        font-size="200" 
+        font-weight="bold" 
+        fill="white" 
+        text-anchor="middle">
+    OA
+  </text>
+  
+  <!-- 装饰性圆环 -->
+  <circle cx="256" cy="256" r="200" 
+          stroke="white" 
+          stroke-width="8" 
+          fill="none"/>
+</svg> 
