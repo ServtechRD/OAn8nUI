@@ -1,5 +1,16 @@
 import React, { useState, useEffect } from "react";
-import { Box, Paper, Typography, Button, Grid, Alert } from "@mui/material";
+import {
+  Box,
+  Paper,
+  Typography,
+  Button,
+  Grid,
+  Alert,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogActions,
+} from "@mui/material";
 import { DatePicker } from "@mui/x-date-pickers";
 import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
 import { AdapterDateFns } from "@mui/x-date-pickers/AdapterDateFns";
@@ -14,6 +25,8 @@ const LeaveQuery = () => {
   const [success, setSuccess] = useState("");
   const [loading, setLoading] = useState(false);
   const [leaveRecords, setLeaveRecords] = useState([]);
+  const [cancelDialogOpen, setCancelDialogOpen] = useState(false);
+  const [selectedRecord, setSelectedRecord] = useState(null);
 
   const [dateRange, setDateRange] = useState({
     startDate: startOfMonth(new Date()),
@@ -48,7 +61,7 @@ const LeaveQuery = () => {
             variant="outlined"
             color="error"
             size="small"
-            onClick={() => handleCancel(params.row)}
+            onClick={() => handleCancelClick(params.row)}
           >
             取消
           </Button>
@@ -99,16 +112,22 @@ const LeaveQuery = () => {
     }
   };
 
-  const handleCancel = async (record) => {
+  const handleCancelClick = (record) => {
+    setSelectedRecord(record);
+    setCancelDialogOpen(true);
+  };
+
+  const handleCancelConfirm = async () => {
     try {
       setError("");
       setSuccess("");
+      setLoading(true);
 
       const response = await axios.post(
-        "https://cloud.servtech.com.tw:35678/webhook/75ab3495-6769-41c4-a50c-68502ceaa3d5",
+        "https://cloud.servtech.com.tw:35678/webhook/be073a2f-f948-4c9e-b649-30e3d57387f6",
         {
-          ...record,
-          狀態: "已取消",
+          leaveId: selectedRecord.單號,
+          status: "已取消",
         }
       );
 
@@ -119,10 +138,20 @@ const LeaveQuery = () => {
         setError("取消請假失敗：" + response.data.message);
       }
     } catch (error) {
+      console.error("取消错误:", error);
       setError(
         "取消請假失敗：" + (error.response?.data?.message || error.message)
       );
+    } finally {
+      setLoading(false);
+      setCancelDialogOpen(false);
+      setSelectedRecord(null);
     }
+  };
+
+  const handleCancelClose = () => {
+    setCancelDialogOpen(false);
+    setSelectedRecord(null);
   };
 
   useEffect(() => {
@@ -191,9 +220,37 @@ const LeaveQuery = () => {
               disableSelectionOnClick
               loading={loading}
               getRowId={(row) => row.單號 || Math.random()}
+              initialState={{
+                filter: {
+                  filterModel: {
+                    items: [
+                      {
+                        columnField: "狀態",
+                        operatorValue: "!=",
+                        value: "已取消",
+                      },
+                    ],
+                  },
+                },
+              }}
             />
           </Box>
         </Paper>
+
+        <Dialog open={cancelDialogOpen} onClose={handleCancelClose}>
+          <DialogTitle>確認取消</DialogTitle>
+          <DialogContent>確定要取消這筆請假記錄嗎？</DialogContent>
+          <DialogActions>
+            <Button onClick={handleCancelClose}>取消</Button>
+            <Button
+              onClick={handleCancelConfirm}
+              color="error"
+              variant="contained"
+            >
+              確定
+            </Button>
+          </DialogActions>
+        </Dialog>
       </Box>
     </LocalizationProvider>
   );
