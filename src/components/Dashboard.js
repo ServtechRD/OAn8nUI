@@ -23,6 +23,7 @@ import {
 } from "@mui/icons-material";
 import { useAuth } from "../contexts/AuthContext";
 import LeaveRequest from "./LeaveRequest";
+import LeaveQuery from "./LeaveQuery";
 
 const drawerWidth = 240;
 
@@ -44,8 +45,8 @@ const Dashboard = () => {
     switch (currentPage) {
       case "leaveRequest":
         return <LeaveRequest />;
-      case "leaveBalance":
-        return <Typography>查詢剩餘假</Typography>;
+      case "leaveQuery":
+        return <LeaveQuery />;
       default:
         return <Typography>歡迎使用系統</Typography>;
     }
@@ -114,8 +115,8 @@ const Dashboard = () => {
               </ListItemButton>
               <ListItemButton
                 sx={{ pl: 4 }}
-                onClick={() => handleMenuItemClick("leaveBalance")}
-                selected={currentPage === "leaveBalance"}
+                onClick={() => handleMenuItemClick("leaveQuery")}
+                selected={currentPage === "leaveQuery"}
               >
                 <ListItemIcon>
                   <CalendarMonth />
