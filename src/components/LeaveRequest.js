@@ -11,8 +11,9 @@ import {
   DialogContent,
   DialogActions,
   Alert,
+  Grid,
 } from "@mui/material";
-import { DatePicker, TimePicker } from "@mui/x-date-pickers";
+import { DatePicker, TimePicker, DateCalendar } from "@mui/x-date-pickers";
 import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
 import { AdapterDateFns } from "@mui/x-date-pickers/AdapterDateFns";
 import { format, parse } from "date-fns";
@@ -121,12 +122,68 @@ const LeaveRequest = () => {
             請假申請
           </Typography>
 
-          <DatePicker
-            label="選擇日期"
-            value={selectedDate}
-            onChange={handleDateSelect}
-            slotProps={{ textField: { fullWidth: true, sx: { mb: 2 } } }}
-          />
+          <Paper
+            elevation={0}
+            sx={{
+              p: 2,
+              border: "1px solid",
+              borderColor: "divider",
+              borderRadius: 2,
+              maxWidth: "400px",
+              mx: "auto",
+            }}
+          >
+            <DateCalendar
+              value={selectedDate}
+              onChange={handleDateSelect}
+              sx={{
+                width: "100%",
+                "& .MuiPickersCalendarHeader-root": {
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "space-between",
+                },
+                "& .MuiPickersDay-root": {
+                  margin: "2px",
+                  width: "36px",
+                  height: "36px",
+                  borderRadius: "50%",
+                  "&.Mui-selected": {
+                    backgroundColor: "primary.main",
+                    color: "primary.contrastText",
+                    "&:hover": {
+                      backgroundColor: "primary.dark",
+                    },
+                  },
+                },
+              }}
+            />
+          </Paper>
+
+          <Grid container spacing={3}>
+            <Grid item xs={12} md={8}>
+              <Paper
+                elevation={0}
+                sx={{
+                  p: 2,
+                  border: "1px solid",
+                  borderColor: "divider",
+                  borderRadius: 2,
+                  height: "100%",
+                }}
+              >
+                <Typography variant="h6" gutterBottom>
+                  請假資訊
+                </Typography>
+                <Typography variant="body2" color="text.secondary" paragraph>
+                  剩餘特休時數：{user?.特休時數 - user?.已請特休時數} 小時
+                </Typography>
+                <Typography variant="body2" color="text.secondary" paragraph>
+                  工作時間：{user?.上班時間} - {user?.下班時間}
+                </Typography>
+              </Paper>
+            </Grid>
+          </Grid>
 
           <Dialog
             open={openDialog}
