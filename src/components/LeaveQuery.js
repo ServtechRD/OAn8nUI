@@ -94,11 +94,14 @@ const LeaveQuery = () => {
       console.log("API 响应:", response.data);
 
       if (response.data) {
-        // 确保数据是数组
+        // 确保数据是数组，并过滤掉已取消的记录
         const records = Array.isArray(response.data)
           ? response.data
           : [response.data];
-        setLeaveRecords(records);
+        const filteredRecords = records.filter(
+          (record) => record.狀態 !== "已取消"
+        );
+        setLeaveRecords(filteredRecords);
       } else {
         setLeaveRecords([]);
         setError("未获取到数据");
