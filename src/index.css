@@ -1,0 +1,65 @@
+body {
+  margin: 0;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
+    'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
+    sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+code {
+  font-family: source-code-pro, Menlo, Monaco, Consolas, 'Courier New',
+    monospace;
+}
+
+/* 全局样式重置 */
+* {
+  box-sizing: border-box;
+}
+
+/* 移除默认边距 */
+html, body {
+  margin: 0;
+  padding: 0;
+  height: 100%;
+}
+
+/* 设置根元素高度 */
+#root {
+  height: 100%;
+}
+
+/* 移除列表样式 */
+ul, ol {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+/* 移除链接下划线 */
+a {
+  text-decoration: none;
+  color: inherit;
+}
+
+/* 移除按钮默认样式 */
+button {
+  border: none;
+  background: none;
+  padding: 0;
+  cursor: pointer;
+  font: inherit;
+}
+
+/* 移除输入框默认样式 */
+input, textarea {
+  font: inherit;
+  border: none;
+  outline: none;
+}
+
+/* 移除表格边框间距 */
+table {
+  border-collapse: collapse;
+  border-spacing: 0;
+} 
