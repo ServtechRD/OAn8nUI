@@ -69,14 +69,12 @@ const LeaveQuery = () => {
         enddate: format(dateRange.endDate, "yyyy-MM-dd"),
       });
 
-      const response = await axios.get(
+      const response = await axios.post(
         "https://cloud.servtech.com.tw:35678/webhook/dd202272-d668-4b3e-ad9a-ad21c6c49be2",
         {
-          params: {
-            username: user?.帳號,
-            startdate: format(dateRange.startDate, "yyyy-MM-dd"),
-            enddate: format(dateRange.endDate, "yyyy-MM-dd"),
-          },
+          username: user?.帳號,
+          startdate: format(dateRange.startDate, "yyyy-MM-dd"),
+          enddate: format(dateRange.endDate, "yyyy-MM-dd"),
         }
       );
 
