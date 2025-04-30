@@ -120,7 +120,7 @@ const Dashboard = () => {
                 <ListItemIcon>
                   <CalendarMonth />
                 </ListItemIcon>
-                <ListItemText primary="查詢剩餘假" />
+                <ListItemText primary="查詢請假" />
               </ListItemButton>
             </List>
           </Collapse>

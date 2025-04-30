@@ -122,6 +122,15 @@ const LeaveRequest = () => {
             請假申請
           </Typography>
 
+          <Box sx={{ mb: 3, display: "flex", gap: 2, alignItems: "center" }}>
+            <Typography variant="body2" color="text.secondary">
+              剩餘特休時數：{user?.特休時數 - user?.已請特休時數} 小時
+            </Typography>
+            <Typography variant="body2" color="text.secondary">
+              工作時間：{user?.上班時間} - {user?.下班時間}
+            </Typography>
+          </Box>
+
           <Paper
             elevation={0}
             sx={{
@@ -129,7 +138,7 @@ const LeaveRequest = () => {
               border: "1px solid",
               borderColor: "divider",
               borderRadius: 2,
-              maxWidth: "400px",
+              maxWidth: "600px",
               mx: "auto",
             }}
           >
@@ -145,8 +154,8 @@ const LeaveRequest = () => {
                 },
                 "& .MuiPickersDay-root": {
                   margin: "2px",
-                  width: "36px",
-                  height: "36px",
+                  width: "42px",
+                  height: "42px",
                   borderRadius: "50%",
                   "&.Mui-selected": {
                     backgroundColor: "primary.main",
@@ -159,31 +168,6 @@ const LeaveRequest = () => {
               }}
             />
           </Paper>
-
-          <Grid container spacing={3}>
-            <Grid item xs={12} md={8}>
-              <Paper
-                elevation={0}
-                sx={{
-                  p: 2,
-                  border: "1px solid",
-                  borderColor: "divider",
-                  borderRadius: 2,
-                  height: "100%",
-                }}
-              >
-                <Typography variant="h6" gutterBottom>
-                  請假資訊
-                </Typography>
-                <Typography variant="body2" color="text.secondary" paragraph>
-                  剩餘特休時數：{user?.特休時數 - user?.已請特休時數} 小時
-                </Typography>
-                <Typography variant="body2" color="text.secondary" paragraph>
-                  工作時間：{user?.上班時間} - {user?.下班時間}
-                </Typography>
-              </Paper>
-            </Grid>
-          </Grid>
 
           <Dialog
             open={openDialog}
