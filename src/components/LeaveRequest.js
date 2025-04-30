@@ -84,15 +84,16 @@ const LeaveRequest = () => {
         requestData
       );
 
-      if (response1.data.status === "success") {
+      if (response1.data[0]?.status === "success") {
+        const firstApiData = response1.data[0].data;
         // 调用第二个 API，添加 days 和 totalHours
         const response2 = await axios.post(
           "https://cloud.servtech.com.tw:35678/webhook/75ab3495-6769-41c4-a50c-68502ceaa3d5",
           {
             ...requestData,
-            ...response1.data,
-            days: response1.data.days,
-            totalHours: response1.data.totalHours,
+            ...firstApiData,
+            days: firstApiData.days,
+            totalHours: firstApiData.totalHours,
           }
         );
 
@@ -103,7 +104,7 @@ const LeaveRequest = () => {
           setError("請假申請失敗：" + response2.data.message);
         }
       } else {
-        setError("請假檢查失敗：" + response1.data.message);
+        setError("請假檢查失敗：" + (response1.data[0]?.message || "未知錯誤"));
       }
     } catch (error) {
       setError(
