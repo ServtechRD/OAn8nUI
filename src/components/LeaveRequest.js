@@ -122,9 +122,7 @@ const LeaveRequest = () => {
             label="選擇日期"
             value={selectedDate}
             onChange={handleDateSelect}
-            renderInput={(params) => (
-              <TextField {...params} fullWidth sx={{ mb: 2 }} />
-            )}
+            slotProps={{ textField: { fullWidth: true, sx: { mb: 2 } } }}
           />
 
           <Dialog
@@ -169,9 +167,7 @@ const LeaveRequest = () => {
                 onChange={(date) =>
                   setFormData({ ...formData, leaveStartDate: date })
                 }
-                renderInput={(params) => (
-                  <TextField {...params} fullWidth sx={{ mb: 2 }} />
-                )}
+                slotProps={{ textField: { fullWidth: true, sx: { mb: 2 } } }}
               />
 
               <TimePicker
@@ -180,9 +176,7 @@ const LeaveRequest = () => {
                 onChange={(time) =>
                   setFormData({ ...formData, leaveStartTime: time })
                 }
-                renderInput={(params) => (
-                  <TextField {...params} fullWidth sx={{ mb: 2 }} />
-                )}
+                slotProps={{ textField: { fullWidth: true, sx: { mb: 2 } } }}
               />
 
               <DatePicker
@@ -191,9 +185,7 @@ const LeaveRequest = () => {
                 onChange={(date) =>
                   setFormData({ ...formData, leaveEndDate: date })
                 }
-                renderInput={(params) => (
-                  <TextField {...params} fullWidth sx={{ mb: 2 }} />
-                )}
+                slotProps={{ textField: { fullWidth: true, sx: { mb: 2 } } }}
               />
 
               <TimePicker
@@ -202,9 +194,7 @@ const LeaveRequest = () => {
                 onChange={(time) =>
                   setFormData({ ...formData, leaveEndTime: time })
                 }
-                renderInput={(params) => (
-                  <TextField {...params} fullWidth sx={{ mb: 2 }} />
-                )}
+                slotProps={{ textField: { fullWidth: true, sx: { mb: 2 } } }}
               />
 
               <TextField
