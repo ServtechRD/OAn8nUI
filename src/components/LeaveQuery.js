@@ -134,11 +134,11 @@ const LeaveQuery = () => {
         }
       );
 
-      if (response.data.status === "success") {
+      if (response.data[0]?.status === "success") {
         setSuccess("取消請假成功！");
         handleQuery(); // 重新查詢列表
       } else {
-        setError("取消請假失敗：" + response.data.message);
+        setError("取消請假失敗：" + (response.data[0]?.message || "未知錯誤"));
       }
     } catch (error) {
       console.error("取消错误:", error);
