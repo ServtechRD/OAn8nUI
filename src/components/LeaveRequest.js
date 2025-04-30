@@ -105,7 +105,7 @@ const LeaveRequest = () => {
       }
     } catch (error) {
       setError(
-        "請假申請失敗：" + (error.response?.data?.message || error.message)
+        "請假檢查失敗：" + (error.response?.data?.message || error.message)
       );
     }
   };
