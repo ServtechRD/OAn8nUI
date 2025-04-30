@@ -63,6 +63,12 @@ const LeaveQuery = () => {
       setSuccess("");
       setLoading(true);
 
+      console.log("查询参数:", {
+        username: user?.帳號,
+        startdate: format(dateRange.startDate, "yyyy-MM-dd"),
+        enddate: format(dateRange.endDate, "yyyy-MM-dd"),
+      });
+
       const response = await axios.get(
         "https://cloud.servtech.com.tw:35678/webhook/dd202272-d668-4b3e-ad9a-ad21c6c49be2",
         {
@@ -74,11 +80,22 @@ const LeaveQuery = () => {
         }
       );
 
+      console.log("API 响应:", response.data);
+
       if (response.data) {
-        setLeaveRecords(response.data);
+        // 确保数据是数组
+        const records = Array.isArray(response.data)
+          ? response.data
+          : [response.data];
+        setLeaveRecords(records);
+      } else {
+        setLeaveRecords([]);
+        setError("未获取到数据");
       }
     } catch (error) {
+      console.error("查询错误:", error);
       setError("查詢失敗：" + (error.response?.data?.message || error.message));
+      setLeaveRecords([]);
     } finally {
       setLoading(false);
     }
