@@ -22,16 +22,33 @@ import {
   Logout,
 } from "@mui/icons-material";
 import { useAuth } from "../contexts/AuthContext";
+import LeaveRequest from "./LeaveRequest";
 
 const drawerWidth = 240;
 
 const Dashboard = () => {
   const [open, setOpen] = useState(true);
   const [leaveOpen, setLeaveOpen] = useState(false);
+  const [currentPage, setCurrentPage] = useState("leaveRequest");
   const { user, logout } = useAuth();
 
   const handleLeaveClick = () => {
     setLeaveOpen(!leaveOpen);
+  };
+
+  const handleMenuItemClick = (page) => {
+    setCurrentPage(page);
+  };
+
+  const renderContent = () => {
+    switch (currentPage) {
+      case "leaveRequest":
+        return <LeaveRequest />;
+      case "leaveBalance":
+        return <Typography>查詢剩餘假</Typography>;
+      default:
+        return <Typography>歡迎使用系統</Typography>;
+    }
   };
 
   return (
@@ -85,13 +102,21 @@ const Dashboard = () => {
           </ListItem>
           <Collapse in={leaveOpen} timeout="auto" unmountOnExit>
             <List component="div" disablePadding>
-              <ListItemButton sx={{ pl: 4 }}>
+              <ListItemButton
+                sx={{ pl: 4 }}
+                onClick={() => handleMenuItemClick("leaveRequest")}
+                selected={currentPage === "leaveRequest"}
+              >
                 <ListItemIcon>
                   <CalendarMonth />
                 </ListItemIcon>
                 <ListItemText primary="進行請假" />
               </ListItemButton>
-              <ListItemButton sx={{ pl: 4 }}>
+              <ListItemButton
+                sx={{ pl: 4 }}
+                onClick={() => handleMenuItemClick("leaveBalance")}
+                selected={currentPage === "leaveBalance"}
+              >
                 <ListItemIcon>
                   <CalendarMonth />
                 </ListItemIcon>
@@ -111,7 +136,7 @@ const Dashboard = () => {
           marginTop: "64px",
         }}
       >
-        <Typography paragraph>歡迎使用系統</Typography>
+        {renderContent()}
       </Box>
     </Box>
   );
