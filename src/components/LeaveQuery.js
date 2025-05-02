@@ -36,11 +36,25 @@ const LeaveQuery = () => {
   const columns = [
     { field: "單號", headerName: "單號", width: 180 },
     { field: "假別", headerName: "假別", width: 100 },
-    { field: "起始日期", headerName: "請假日期", width: 120 },
+    { field: "起始日期", headerName: "開始日期", width: 120 },
     { field: "起始時間", headerName: "開始時間", width: 100 },
+    { field: "結束日期", headerName: "結束日期", width: 120 },
     { field: "結束時間", headerName: "結束時間", width: 100 },
     { field: "事由", headerName: "請假事由", width: 200 },
-    { field: "時數", headerName: "時數", width: 80 },
+    {
+      field: "時數",
+      headerName: "天數",
+      width: 120,
+      valueFormatter: (params) => {
+        const hours = parseFloat(params.value) || 0;
+        const days = Math.floor(hours / 8);
+        const remainingHours = hours % 8;
+        if (days === 0) {
+          return `${remainingHours}時`;
+        }
+        return `${days}天${remainingHours > 0 ? ` ${remainingHours}時` : ""}`;
+      },
+    },
     { field: "狀態", headerName: "狀態", width: 100 },
     {
       field: "建立時間",
