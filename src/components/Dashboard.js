@@ -20,21 +20,29 @@ import {
   CalendarMonth,
   Menu as MenuIcon,
   Logout,
+  Description,
 } from "@mui/icons-material";
 import { useAuth } from "../contexts/AuthContext";
 import LeaveRequest from "./LeaveRequest";
 import LeaveQuery from "./LeaveQuery";
+import ContractRequest from "./ContractRequest";
+import ContractQuery from "./ContractQuery";
 
 const drawerWidth = 240;
 
 const Dashboard = () => {
   const [open, setOpen] = useState(true);
   const [leaveOpen, setLeaveOpen] = useState(false);
+  const [contractOpen, setContractOpen] = useState(false);
   const [currentPage, setCurrentPage] = useState("leaveRequest");
   const { user, logout } = useAuth();
 
   const handleLeaveClick = () => {
     setLeaveOpen(!leaveOpen);
+  };
+
+  const handleContractClick = () => {
+    setContractOpen(!contractOpen);
   };
 
   const handleMenuItemClick = (page) => {
@@ -47,6 +55,10 @@ const Dashboard = () => {
         return <LeaveRequest />;
       case "leaveQuery":
         return <LeaveQuery />;
+      case "contractRequest":
+        return <ContractRequest />;
+      case "contractQuery":
+        return <ContractQuery />;
       default:
         return <Typography>歡迎使用系統</Typography>;
     }
@@ -122,6 +134,41 @@ const Dashboard = () => {
                   <CalendarMonth />
                 </ListItemIcon>
                 <ListItemText primary="查詢請假" />
+              </ListItemButton>
+            </List>
+          </Collapse>
+
+          {/* 合約系統 */}
+          <ListItem disablePadding>
+            <ListItemButton onClick={handleContractClick}>
+              <ListItemIcon>
+                <Description />
+              </ListItemIcon>
+              <ListItemText primary="合約系統" />
+              {contractOpen ? <ExpandLess /> : <ExpandMore />}
+            </ListItemButton>
+          </ListItem>
+          <Collapse in={contractOpen} timeout="auto" unmountOnExit>
+            <List component="div" disablePadding>
+              <ListItemButton
+                sx={{ pl: 4 }}
+                onClick={() => handleMenuItemClick("contractRequest")}
+                selected={currentPage === "contractRequest"}
+              >
+                <ListItemIcon>
+                  <Description />
+                </ListItemIcon>
+                <ListItemText primary="申請合用印" />
+              </ListItemButton>
+              <ListItemButton
+                sx={{ pl: 4 }}
+                onClick={() => handleMenuItemClick("contractQuery")}
+                selected={currentPage === "contractQuery"}
+              >
+                <ListItemIcon>
+                  <Description />
+                </ListItemIcon>
+                <ListItemText primary="查詢合約申請" />
               </ListItemButton>
             </List>
           </Collapse>
