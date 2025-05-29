@@ -21,13 +21,20 @@ import {
 import { DatePicker } from "@mui/x-date-pickers";
 import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
 import { AdapterDateFns } from "@mui/x-date-pickers/AdapterDateFns";
-import { format } from "date-fns";
+import { format, startOfYear, endOfMonth, setDate } from "date-fns";
 import axios from "axios";
 import InfoIcon from "@mui/icons-material/Info";
 
 const ContractQuery = () => {
-  const [startDate, setStartDate] = useState(null);
-  const [endDate, setEndDate] = useState(null);
+  // 获取当前日期
+  const today = new Date();
+  // 设置起始日期为当年1月1日
+  const defaultStartDate = startOfYear(today);
+  // 设置结束日期为当月最后一天
+  const defaultEndDate = endOfMonth(today);
+
+  const [startDate, setStartDate] = useState(defaultStartDate);
+  const [endDate, setEndDate] = useState(defaultEndDate);
   const [contracts, setContracts] = useState([]);
   const [selectedContract, setSelectedContract] = useState(null);
   const [openDialog, setOpenDialog] = useState(false);
@@ -49,7 +56,13 @@ const ContractQuery = () => {
       );
 
       if (response.data) {
-        setContracts(response.data);
+        // 过滤数据，只保留申请日期在查询范围内的记录
+        const filteredContracts = response.data.filter((contract) => {
+          const applyDate = new Date(contract.data.申請日期);
+          return applyDate >= startDate && applyDate <= endDate;
+        });
+
+        setContracts(filteredContracts);
         setError("");
       }
     } catch (err) {
@@ -171,14 +184,16 @@ const ContractQuery = () => {
             <DialogContent dividers>
               {selectedContract && (
                 <Grid container spacing={2}>
-                  {Object.entries(selectedContract).map(([key, value]) => (
-                    <Grid item xs={12} md={6} key={key}>
-                      <Typography variant="subtitle2" color="textSecondary">
-                        {key}:
-                      </Typography>
-                      <Typography variant="body1">{value || "-"}</Typography>
-                    </Grid>
-                  ))}
+                  {Object.entries(selectedContract)
+                    .filter(([key]) => key !== "row_id")
+                    .map(([key, value]) => (
+                      <Grid item xs={12} md={6} key={key}>
+                        <Typography variant="subtitle2" color="textSecondary">
+                          {key}:
+                        </Typography>
+                        <Typography variant="body1">{value || "-"}</Typography>
+                      </Grid>
+                    ))}
                 </Grid>
               )}
             </DialogContent>
