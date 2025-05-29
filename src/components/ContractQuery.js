@@ -21,7 +21,7 @@ import {
 import { DatePicker } from "@mui/x-date-pickers";
 import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
 import { AdapterDateFns } from "@mui/x-date-pickers/AdapterDateFns";
-import { format, startOfYear, endOfMonth, setDate } from "date-fns";
+import { format, startOfYear, endOfMonth, setDate, parse } from "date-fns";
 import axios from "axios";
 import InfoIcon from "@mui/icons-material/Info";
 
@@ -40,6 +40,22 @@ const ContractQuery = () => {
   const [openDialog, setOpenDialog] = useState(false);
   const [error, setError] = useState("");
 
+  // 添加日期格式处理函数
+  const formatDateString = (dateStr) => {
+    if (!dateStr) return null;
+    // 移除所有空格
+    dateStr = dateStr.trim();
+    // 如果已经包含 - 或 /，直接返回
+    if (dateStr.includes("-") || dateStr.includes("/")) {
+      return dateStr;
+    }
+    // 假设输入格式为 YYYYMMDD
+    if (dateStr.length === 8) {
+      return `${dateStr.slice(0, 4)}/${dateStr.slice(4, 6)}/${dateStr.slice(6, 8)}`;
+    }
+    return dateStr;
+  };
+
   const handleQuery = async () => {
     if (!startDate || !endDate) {
       setError("請選擇起始日期和結束日期");
@@ -56,10 +72,18 @@ const ContractQuery = () => {
       );
 
       if (response.data) {
-        // 过滤数据，只保留申请日期在查询范围内的记录
+        // 过滤数据，处理日期格式后再比较
         const filteredContracts = response.data.filter((contract) => {
-          const applyDate = new Date(contract.data.申請日期);
-          return applyDate >= startDate && applyDate <= endDate;
+          const formattedDate = formatDateString(contract.data.申請日期);
+          if (!formattedDate) return false;
+
+          try {
+            const applyDate = parse(formattedDate, "yyyy/MM/dd", new Date());
+            return applyDate >= startDate && applyDate <= endDate;
+          } catch (err) {
+            console.error("日期解析錯誤:", formattedDate);
+            return false;
+          }
         });
 
         setContracts(filteredContracts);
@@ -87,8 +111,24 @@ const ContractQuery = () => {
 
   return (
     <LocalizationProvider dateAdapter={AdapterDateFns}>
-      <Box sx={{ p: 3 }}>
-        <Paper sx={{ p: 3 }}>
+      <Box
+        sx={{
+          p: 3,
+          width: "100%",
+          height: "100%",
+          display: "flex",
+          flexDirection: "column",
+        }}
+      >
+        <Paper
+          sx={{
+            p: 3,
+            flex: 1,
+            display: "flex",
+            flexDirection: "column",
+            overflow: "hidden", // 防止内容溢出
+          }}
+        >
           <Typography variant="h5" gutterBottom>
             合約查詢
           </Typography>
@@ -128,8 +168,8 @@ const ContractQuery = () => {
             </Typography>
           )}
 
-          <TableContainer>
-            <Table>
+          <TableContainer sx={{ flex: 1, overflow: "auto" }}>
+            <Table stickyHeader>
               <TableHead>
                 <TableRow>
                   <TableCell>合約編號</TableCell>
@@ -185,7 +225,7 @@ const ContractQuery = () => {
               {selectedContract && (
                 <Grid container spacing={2}>
                   {Object.entries(selectedContract)
-                    .filter(([key]) => key !== "row_id")
+                    .filter(([key]) => key !== "row_number")
                     .map(([key, value]) => (
                       <Grid item xs={12} md={6} key={key}>
                         <Typography variant="subtitle2" color="textSecondary">
