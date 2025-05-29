@@ -41,7 +41,7 @@ const ContractQuery = () => {
 
     try {
       const response = await axios.post(
-        "https://cloud.servtech.com.tw:35678/webhook-test/1a02ada6-cca4-4146-a527-7f47a7e09a31",
+        "https://cloud.servtech.com.tw:35678/webhook/1a02ada6-cca4-4146-a527-7f47a7e09a31",
         {
           startDate: format(startDate, "yyyy/MM/dd"),
           endDate: format(endDate, "yyyy/MM/dd"),
