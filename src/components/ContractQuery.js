@@ -45,7 +45,7 @@ const ContractQuery = () => {
     if (!dateStr) return null;
 
     // 移除所有空格
-    dateStr = dateStr.trim();
+    dateStr = dateStr.toString().trim();
 
     // 如果已经是标准格式（包含 - 或 /），直接返回
     if (dateStr.includes("-") || dateStr.includes("/")) {
