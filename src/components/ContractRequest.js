@@ -48,6 +48,7 @@ const ContractRequest = () => {
   const [otherContractType, setOtherContractType] = useState("");
   const [otherCurrency, setOtherCurrency] = useState("");
   const [otherWarranty, setOtherWarranty] = useState("");
+  const [totalPercentage, setTotalPercentage] = useState(0);
 
   // 每秒更新一次时间戳记
   useEffect(() => {
@@ -61,7 +62,7 @@ const ContractRequest = () => {
   const initialFormData = {
     時間戳記: new Date(),
     申請日期: new Date(),
-    電子郵件: user?.email || "",
+    電子郵件: user?.個人Email || "",
     請上傳合約電子檔: "",
     申請人: user?.姓名 || "",
     計畫代碼: "",
@@ -134,10 +135,100 @@ const ContractRequest = () => {
     });
   };
 
+  // 计算总占比
+  const calculateTotalPercentage = (formData) => {
+    const total =
+      Number(formData.一期款合約占比 || 0) +
+      Number(formData.二期款合約占比 || 0) +
+      Number(formData.三期款合約占比 || 0) +
+      Number(formData.四期款合約占比 || 0) +
+      Number(formData.五期款合約占比 || 0);
+    setTotalPercentage(total);
+    return total;
+  };
+
+  // 验证合约占比输入
+  const validatePercentage = (value) => {
+    const num = Number(value);
+    if (isNaN(num) || num < 0 || num > 100) {
+      return false;
+    }
+    return true;
+  };
+
+  // 处理合约占比输入
+  const handlePercentageChange = (field, value) => {
+    if (!validatePercentage(value)) {
+      return;
+    }
+    const newFormData = { ...formData, [field]: value };
+    setFormData(newFormData);
+    calculateTotalPercentage(newFormData);
+  };
+
+  // 获取可输入的期款数量
+  const getMaxPaymentTerms = (paymentTerm) => {
+    switch (paymentTerm) {
+      case "一期款":
+        return 1;
+      case "二期款":
+        return 2;
+      case "三期款":
+        return 3;
+      case "四期款":
+        return 4;
+      case "五期款":
+        return 5;
+      default:
+        return 0;
+    }
+  };
+
+  // 处理期款选择变化
+  const handlePaymentTermChange = (e) => {
+    const newPaymentTerm = e.target.value;
+    const maxTerms = getMaxPaymentTerms(newPaymentTerm);
+
+    // 重置超出范围的期款数据
+    const newFormData = { ...formData, 合約收款付款期款: newPaymentTerm };
+
+    if (maxTerms < 5) {
+      newFormData.五期款未稅金額 = 0;
+      newFormData.五期款合約占比 = 0;
+    }
+    if (maxTerms < 4) {
+      newFormData.四期款未稅金額 = 0;
+      newFormData.四期款合約占比 = 0;
+    }
+    if (maxTerms < 3) {
+      newFormData.三期款未稅金額 = 0;
+      newFormData.三期款合約占比 = 0;
+    }
+    if (maxTerms < 2) {
+      newFormData.二期款未稅金額 = 0;
+      newFormData.二期款合約占比 = 0;
+    }
+
+    setFormData(newFormData);
+    calculateTotalPercentage(newFormData);
+  };
+
+  // 验证期款输入是否允许
+  const isPaymentTermEnabled = (termNumber) => {
+    const maxTerms = getMaxPaymentTerms(formData.合約收款付款期款);
+    return termNumber <= maxTerms;
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError("");
     setSuccess("");
+
+    // 验证总占比
+    if (totalPercentage > 100) {
+      setError("合約占比總和不能超過100%");
+      return;
+    }
 
     try {
       // 准备提交数据
@@ -182,10 +273,12 @@ const ContractRequest = () => {
         submitData
       );
 
-      if (response.data.success) {
-        setSuccess("合約申請已成功提交");
+      if (response.data.status === "success") {
+        setSuccess("合約用印提交成功");
         setOpenDialog(false);
         resetForm();
+      } else {
+        setError(response.data.message || "合約用印提交失敗");
       }
     } catch (err) {
       setError(err.response?.data?.message || "提交失敗，請稍後重試");
@@ -283,9 +376,8 @@ const ContractRequest = () => {
                     }
                     fullWidth
                     required
-                    InputProps={{
-                      readOnly: true,
-                    }}
+                    type="email"
+                    helperText="預設為登入用戶的電子郵件"
                   />
                 </Grid>
 
@@ -664,12 +756,7 @@ const ContractRequest = () => {
                     select
                     label="合約收款/付款期款"
                     value={formData.合約收款付款期款}
-                    onChange={(e) =>
-                      setFormData({
-                        ...formData,
-                        合約收款付款期款: e.target.value,
-                      })
-                    }
+                    onChange={handlePaymentTermChange}
                     fullWidth
                     required
                   >
@@ -695,6 +782,7 @@ const ContractRequest = () => {
                     }
                     fullWidth
                     inputProps={{ min: 0 }}
+                    disabled={!isPaymentTermEnabled(1)}
                   />
                 </Grid>
 
@@ -704,13 +792,13 @@ const ContractRequest = () => {
                     label="一期款合約占比(%)"
                     value={formData.一期款合約占比}
                     onChange={(e) =>
-                      setFormData({
-                        ...formData,
-                        一期款合約占比: e.target.value,
-                      })
+                      handlePercentageChange("一期款合約占比", e.target.value)
                     }
                     fullWidth
-                    inputProps={{ min: 0, max: 100 }}
+                    inputProps={{ min: 0, max: 100, step: 0.01 }}
+                    error={!validatePercentage(formData.一期款合約占比)}
+                    helperText="請輸入0-100之間的數值"
+                    disabled={!isPaymentTermEnabled(1)}
                   />
                 </Grid>
 
@@ -728,6 +816,7 @@ const ContractRequest = () => {
                     }
                     fullWidth
                     inputProps={{ min: 0 }}
+                    disabled={!isPaymentTermEnabled(2)}
                   />
                 </Grid>
 
@@ -737,13 +826,13 @@ const ContractRequest = () => {
                     label="二期款合約占比(%)"
                     value={formData.二期款合約占比}
                     onChange={(e) =>
-                      setFormData({
-                        ...formData,
-                        二期款合約占比: e.target.value,
-                      })
+                      handlePercentageChange("二期款合約占比", e.target.value)
                     }
                     fullWidth
-                    inputProps={{ min: 0, max: 100 }}
+                    inputProps={{ min: 0, max: 100, step: 0.01 }}
+                    error={!validatePercentage(formData.二期款合約占比)}
+                    helperText="請輸入0-100之間的數值"
+                    disabled={!isPaymentTermEnabled(2)}
                   />
                 </Grid>
 
@@ -761,6 +850,7 @@ const ContractRequest = () => {
                     }
                     fullWidth
                     inputProps={{ min: 0 }}
+                    disabled={!isPaymentTermEnabled(3)}
                   />
                 </Grid>
 
@@ -770,13 +860,13 @@ const ContractRequest = () => {
                     label="三期款合約占比(%)"
                     value={formData.三期款合約占比}
                     onChange={(e) =>
-                      setFormData({
-                        ...formData,
-                        三期款合約占比: e.target.value,
-                      })
+                      handlePercentageChange("三期款合約占比", e.target.value)
                     }
                     fullWidth
-                    inputProps={{ min: 0, max: 100 }}
+                    inputProps={{ min: 0, max: 100, step: 0.01 }}
+                    error={!validatePercentage(formData.三期款合約占比)}
+                    helperText="請輸入0-100之間的數值"
+                    disabled={!isPaymentTermEnabled(3)}
                   />
                 </Grid>
 
@@ -794,6 +884,7 @@ const ContractRequest = () => {
                     }
                     fullWidth
                     inputProps={{ min: 0 }}
+                    disabled={!isPaymentTermEnabled(4)}
                   />
                 </Grid>
 
@@ -803,13 +894,13 @@ const ContractRequest = () => {
                     label="四期款合約占比(%)"
                     value={formData.四期款合約占比}
                     onChange={(e) =>
-                      setFormData({
-                        ...formData,
-                        四期款合約占比: e.target.value,
-                      })
+                      handlePercentageChange("四期款合約占比", e.target.value)
                     }
                     fullWidth
-                    inputProps={{ min: 0, max: 100 }}
+                    inputProps={{ min: 0, max: 100, step: 0.01 }}
+                    error={!validatePercentage(formData.四期款合約占比)}
+                    helperText="請輸入0-100之間的數值"
+                    disabled={!isPaymentTermEnabled(4)}
                   />
                 </Grid>
 
@@ -827,6 +918,7 @@ const ContractRequest = () => {
                     }
                     fullWidth
                     inputProps={{ min: 0 }}
+                    disabled={!isPaymentTermEnabled(5)}
                   />
                 </Grid>
 
@@ -836,14 +928,26 @@ const ContractRequest = () => {
                     label="五期款合約占比(%)"
                     value={formData.五期款合約占比}
                     onChange={(e) =>
-                      setFormData({
-                        ...formData,
-                        五期款合約占比: e.target.value,
-                      })
+                      handlePercentageChange("五期款合約占比", e.target.value)
                     }
                     fullWidth
-                    inputProps={{ min: 0, max: 100 }}
+                    inputProps={{ min: 0, max: 100, step: 0.01 }}
+                    error={!validatePercentage(formData.五期款合約占比)}
+                    helperText="請輸入0-100之間的數值"
+                    disabled={!isPaymentTermEnabled(5)}
                   />
+                </Grid>
+
+                {/* 显示总占比 */}
+                <Grid item xs={12}>
+                  <Typography
+                    variant="subtitle1"
+                    color={totalPercentage > 100 ? "error" : "textPrimary"}
+                    sx={{ mt: 2 }}
+                  >
+                    合約占比總計: {totalPercentage.toFixed(2)}%
+                    {totalPercentage > 100 && " (超過100%)"}
+                  </Typography>
                 </Grid>
               </Grid>
             </DialogContent>
