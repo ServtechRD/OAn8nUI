@@ -43,17 +43,42 @@ const ContractQuery = () => {
   // 添加日期格式处理函数
   const formatDateString = (dateStr) => {
     if (!dateStr) return null;
+
     // 移除所有空格
     dateStr = dateStr.trim();
-    // 如果已经包含 - 或 /，直接返回
+
+    // 如果已经是标准格式（包含 - 或 /），直接返回
     if (dateStr.includes("-") || dateStr.includes("/")) {
-      return dateStr;
+      // 统一转换为 / 格式
+      return dateStr.replace(/-/g, "/");
     }
-    // 假设输入格式为 YYYYMMDD
-    if (dateStr.length === 8) {
-      return `${dateStr.slice(0, 4)}/${dateStr.slice(4, 6)}/${dateStr.slice(6, 8)}`;
+
+    // 处理纯数字格式
+    // 移除所有非数字字符
+    const numbersOnly = dateStr.replace(/\D/g, "");
+
+    console.log(numbersOnly);
+
+    // 根据长度处理不同格式
+    if (numbersOnly.length === 8) {
+      // YYYYMMDD 格式
+      return `${numbersOnly.slice(0, 4)}/${numbersOnly.slice(4, 6)}/${numbersOnly.slice(6, 8)}`;
+    } else if (numbersOnly.length === 7) {
+      // 处理 YYYYMDD 格式（如：2024315）
+      const year = numbersOnly.slice(0, 4);
+      const month = numbersOnly.slice(4, 5);
+      const day = numbersOnly.slice(5, 7);
+      return `${year}/0${month}/${day}`;
+    } else if (numbersOnly.length === 6) {
+      // 处理 YYYYMD 格式（如：202431）
+      const year = numbersOnly.slice(0, 4);
+      const month = numbersOnly.slice(4, 5);
+      const day = numbersOnly.slice(5, 6);
+      return `${year}/0${month}/0${day}`;
     }
-    return dateStr;
+
+    console.warn("無法識別的日期格式:", dateStr);
+    return null;
   };
 
   const handleQuery = async () => {
@@ -75,13 +100,16 @@ const ContractQuery = () => {
         // 过滤数据，处理日期格式后再比较
         const filteredContracts = response.data.filter((contract) => {
           const formattedDate = formatDateString(contract.data.申請日期);
-          if (!formattedDate) return false;
+          if (!formattedDate) {
+            console.warn("無效的申請日期:", contract.data.申請日期);
+            return false;
+          }
 
           try {
             const applyDate = parse(formattedDate, "yyyy/MM/dd", new Date());
             return applyDate >= startDate && applyDate <= endDate;
           } catch (err) {
-            console.error("日期解析錯誤:", formattedDate);
+            console.error("日期解析錯誤:", formattedDate, err);
             return false;
           }
         });
