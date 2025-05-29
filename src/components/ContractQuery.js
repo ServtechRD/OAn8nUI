@@ -96,6 +96,7 @@ const ContractQuery = () => {
         }
       );
 
+      console.log(response);
       if (response.data) {
         // 过滤数据，处理日期格式后再比较
         const filteredContracts = response.data.filter((contract) => {
