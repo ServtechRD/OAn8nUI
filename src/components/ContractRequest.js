@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
   Box,
   Paper,
@@ -21,9 +21,15 @@ import { format } from "date-fns";
 import axios from "axios";
 import { useAuth } from "../contexts/AuthContext";
 
-const CONTRACT_TYPES = ["一般合約", "採購合約", "銷售合約", "服務合約"];
-const CONTRACT_CURRENCIES = ["新台幣", "美金", "人民幣", "歐元"];
-const CONTRACT_FLOWS = ["收款", "付款"];
+const CONTRACT_TYPES = ["一般合約", "保密合約", "備忘錄", "報價單", "其他"];
+const CONTRACT_CURRENCIES = ["新台幣", "美金", "人民幣", "其他"];
+const CONTRACT_FLOWS = ["收款", "付款", "無"];
+const CONTRACT_BANKS = [
+  "(收款)台新建北分行",
+  "(收款)台新延平外幣",
+  "(付款)台新延平分行",
+  "(付款)台新延平",
+];
 const CONTRACT_PAYMENT_TERMS = [
   "一期款",
   "二期款",
@@ -31,14 +37,28 @@ const CONTRACT_PAYMENT_TERMS = [
   "四期款",
   "五期款",
 ];
+const WARRANTY_PERIODS = ["無", "1年", "2年", "其他"];
 
 const ContractRequest = () => {
   const { user } = useAuth();
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
   const [openDialog, setOpenDialog] = useState(false);
+  const [currentTimestamp, setCurrentTimestamp] = useState(new Date());
+  const [otherContractType, setOtherContractType] = useState("");
+  const [otherCurrency, setOtherCurrency] = useState("");
+  const [otherWarranty, setOtherWarranty] = useState("");
 
-  const [formData, setFormData] = useState({
+  // 每秒更新一次时间戳记
+  useEffect(() => {
+    const timer = setInterval(() => {
+      setCurrentTimestamp(new Date());
+    }, 1000);
+
+    return () => clearInterval(timer);
+  }, []);
+
+  const initialFormData = {
     時間戳記: new Date(),
     申請日期: new Date(),
     電子郵件: user?.email || "",
@@ -57,13 +77,13 @@ const ContractRequest = () => {
     合約幣值: "新台幣",
     合約金額未稅: 0,
     合約金額含稅: 0,
-    收款付款銀行: "",
+    收款付款銀行: "(收款)台新建北分行",
     簽約廠商名稱: "",
     簽約廠商統編: "",
     簽約代表人: "",
     廠商聯絡人: "",
     廠商聯絡電話: "",
-    保固期間: "",
+    保固期間: "無",
     預計交付日: new Date(),
     交付後多少工作日後: 0,
     合約收款付款期款: "一期款",
@@ -77,7 +97,42 @@ const ContractRequest = () => {
     四期款合約占比: 0,
     五期款未稅金額: 0,
     五期款合約占比: 0,
-  });
+  };
+
+  const [formData, setFormData] = useState(initialFormData);
+
+  // 重置表单时保持电子邮箱不变
+  const resetForm = () => {
+    setFormData({
+      ...initialFormData,
+      計畫代碼: "",
+      計畫名稱: "",
+      申請事由: "",
+      合約名稱: "",
+      合約正本份數: 1,
+      合約副本份數: 1,
+      合約金額未稅: 0,
+      合約金額含稅: 0,
+      收款付款銀行: "(收款)台新建北分行",
+      簽約廠商名稱: "",
+      簽約廠商統編: "",
+      簽約代表人: "",
+      廠商聯絡人: "",
+      廠商聯絡電話: "",
+      保固期間: "無",
+      交付後多少工作日後: 0,
+      一期款未稅金額: 0,
+      一期款合約占比: 0,
+      二期款未稅金額: 0,
+      二期款合約占比: 0,
+      三期款未稅金額: 0,
+      三期款合約占比: 0,
+      四期款未稅金額: 0,
+      四期款合約占比: 0,
+      五期款未稅金額: 0,
+      五期款合約占比: 0,
+    });
+  };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -88,11 +143,23 @@ const ContractRequest = () => {
       // 准备提交数据
       const submitData = {
         ...formData,
-        時間戳記: format(formData.時間戳記, "yyyy/MM/dd HH:mm:ss"),
+        時間戳記: format(currentTimestamp, "yyyy/MM/dd HH:mm:ss"),
         申請日期: format(formData.申請日期, "yyyy/MM/dd"),
         合約起始日期: format(formData.合約起始日期, "yyyy/MM/dd"),
         合約結束日期: format(formData.合約結束日期, "yyyy/MM/dd"),
         預計交付日: format(formData.預計交付日, "yyyy/MM/dd"),
+        合約類型:
+          formData.合約類型 === "其他"
+            ? `其他_${otherContractType}`
+            : formData.合約類型,
+        合約幣值:
+          formData.合約幣值 === "其他"
+            ? `其他_${otherCurrency}`
+            : formData.合約幣值,
+        保固期間:
+          formData.保固期間 === "其他"
+            ? `其他_${otherWarranty}`
+            : formData.保固期間,
         合約金額未稅: Number(formData.合約金額未稅),
         合約金額含稅: Number(formData.合約金額含稅),
         合約正本份數: Number(formData.合約正本份數),
@@ -118,36 +185,7 @@ const ContractRequest = () => {
       if (response.data.success) {
         setSuccess("合約申請已成功提交");
         setOpenDialog(false);
-        // 重置表单
-        setFormData({
-          ...formData,
-          計畫代碼: "",
-          計畫名稱: "",
-          申請事由: "",
-          合約名稱: "",
-          合約正本份數: 1,
-          合約副本份數: 1,
-          合約金額未稅: 0,
-          合約金額含稅: 0,
-          收款付款銀行: "",
-          簽約廠商名稱: "",
-          簽約廠商統編: "",
-          簽約代表人: "",
-          廠商聯絡人: "",
-          廠商聯絡電話: "",
-          保固期間: "",
-          交付後多少工作日後: 0,
-          一期款未稅金額: 0,
-          一期款合約占比: 0,
-          二期款未稅金額: 0,
-          二期款合約占比: 0,
-          三期款未稅金額: 0,
-          三期款合約占比: 0,
-          四期款未稅金額: 0,
-          四期款合約占比: 0,
-          五期款未稅金額: 0,
-          五期款合約占比: 0,
-        });
+        resetForm();
       }
     } catch (err) {
       setError(err.response?.data?.message || "提交失敗，請稍後重試");
@@ -212,11 +250,16 @@ const ContractRequest = () => {
                 <Grid item xs={12} md={6}>
                   <DateTimePicker
                     label="時間戳記"
-                    value={formData.時間戳記}
-                    onChange={(date) =>
-                      setFormData({ ...formData, 時間戳記: date })
-                    }
-                    slotProps={{ textField: { fullWidth: true } }}
+                    value={currentTimestamp}
+                    readOnly
+                    slotProps={{
+                      textField: {
+                        fullWidth: true,
+                        InputProps: {
+                          readOnly: true,
+                        },
+                      },
+                    }}
                   />
                 </Grid>
 
@@ -240,6 +283,9 @@ const ContractRequest = () => {
                     }
                     fullWidth
                     required
+                    InputProps={{
+                      readOnly: true,
+                    }}
                   />
                 </Grid>
 
@@ -342,6 +388,16 @@ const ContractRequest = () => {
                       </MenuItem>
                     ))}
                   </TextField>
+                  {formData.合約類型 === "其他" && (
+                    <TextField
+                      label="請輸入其他合約類型"
+                      value={otherContractType}
+                      onChange={(e) => setOtherContractType(e.target.value)}
+                      fullWidth
+                      required
+                      sx={{ mt: 1 }}
+                    />
+                  )}
                 </Grid>
 
                 <Grid item xs={12} md={6}>
@@ -430,6 +486,16 @@ const ContractRequest = () => {
                       </MenuItem>
                     ))}
                   </TextField>
+                  {formData.合約幣值 === "其他" && (
+                    <TextField
+                      label="請輸入其他幣值"
+                      value={otherCurrency}
+                      onChange={(e) => setOtherCurrency(e.target.value)}
+                      fullWidth
+                      required
+                      sx={{ mt: 1 }}
+                    />
+                  )}
                 </Grid>
 
                 <Grid item xs={12} md={6}>
@@ -462,6 +528,7 @@ const ContractRequest = () => {
 
                 <Grid item xs={12}>
                   <TextField
+                    select
                     label="收款/付款銀行"
                     value={formData.收款付款銀行}
                     onChange={(e) =>
@@ -469,7 +536,13 @@ const ContractRequest = () => {
                     }
                     fullWidth
                     required
-                  />
+                  >
+                    {CONTRACT_BANKS.map((bank) => (
+                      <MenuItem key={bank} value={bank}>
+                        {bank}
+                      </MenuItem>
+                    ))}
+                  </TextField>
                 </Grid>
 
                 {/* 廠商資訊 */}
@@ -540,16 +613,11 @@ const ContractRequest = () => {
                   />
                 </Grid>
 
-                <Grid item xs={12} md={6}>
-                  <TextField
-                    label="保固期間"
-                    value={formData.保固期間}
-                    onChange={(e) =>
-                      setFormData({ ...formData, 保固期間: e.target.value })
-                    }
-                    fullWidth
-                    required
-                  />
+                <Grid item xs={12}>
+                  <Divider sx={{ my: 2 }} />
+                  <Typography variant="h6" gutterBottom>
+                    交付資訊
+                  </Typography>
                 </Grid>
 
                 <Grid item xs={12} md={6}>
@@ -559,14 +627,16 @@ const ContractRequest = () => {
                     onChange={(date) =>
                       setFormData({ ...formData, 預計交付日: date })
                     }
-                    slotProps={{ textField: { fullWidth: true } }}
+                    slotProps={{
+                      textField: { fullWidth: true, required: true },
+                    }}
                   />
                 </Grid>
 
                 <Grid item xs={12} md={6}>
                   <TextField
                     type="number"
-                    label="交付後多少工作日後"
+                    label="交付後多少工作日後視為驗收通過"
                     value={formData.交付後多少工作日後}
                     onChange={(e) =>
                       setFormData({
@@ -577,6 +647,7 @@ const ContractRequest = () => {
                     fullWidth
                     required
                     inputProps={{ min: 0 }}
+                    helperText="請輸入工作天數"
                   />
                 </Grid>
 
