@@ -180,7 +180,7 @@ const Dashboard = () => {
         sx={{
           flexGrow: 1,
           p: 3,
-          width: open ? `calc(100% - ${drawerWidth}px)` : "140%",
+          width: open ? `calc(100% - ${drawerWidth}px)` : "100%",
           marginLeft: open ? `24px` : 0,
           marginTop: "64px",
           transition: (theme) =>
@@ -188,6 +188,9 @@ const Dashboard = () => {
               easing: theme.transitions.easing.sharp,
               duration: theme.transitions.duration.leavingScreen,
             }),
+          maxWidth: "100%",
+          position: "relative",
+          left: open ? 0 : `-${drawerWidth}px`,
         }}
       >
         {renderContent()}
