@@ -158,7 +158,7 @@ const Dashboard = () => {
                 <ListItemIcon>
                   <Description />
                 </ListItemIcon>
-                <ListItemText primary="申請合用印" />
+                <ListItemText primary="申請合約用印" />
               </ListItemButton>
               <ListItemButton
                 sx={{ pl: 4 }}
@@ -168,7 +168,7 @@ const Dashboard = () => {
                 <ListItemIcon>
                   <Description />
                 </ListItemIcon>
-                <ListItemText primary="查詢合約申請" />
+                <ListItemText primary="查詢合約用印" />
               </ListItemButton>
             </List>
           </Collapse>

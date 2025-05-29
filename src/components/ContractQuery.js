@@ -1,115 +1,76 @@
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import {
   Box,
   Paper,
   Typography,
   TextField,
   Button,
-  Grid,
-  Alert,
   Dialog,
   DialogTitle,
   DialogContent,
   DialogActions,
-  MenuItem,
+  Table,
+  TableBody,
+  TableCell,
+  TableContainer,
+  TableHead,
+  TableRow,
+  IconButton,
+  Grid,
 } from "@mui/material";
 import { DatePicker } from "@mui/x-date-pickers";
 import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
 import { AdapterDateFns } from "@mui/x-date-pickers/AdapterDateFns";
-import { format, startOfMonth, endOfMonth } from "date-fns";
+import { format } from "date-fns";
 import axios from "axios";
-import { useAuth } from "../contexts/AuthContext";
-import { DataGrid } from "@mui/x-data-grid";
-
-const CONTRACT_TYPES = ["採購合約", "銷售合約", "服務合約", "其他合約"];
-const CONTRACT_STATUS = ["待審核", "審核中", "已通過", "已拒絕"];
+import InfoIcon from "@mui/icons-material/Info";
 
 const ContractQuery = () => {
-  const { user } = useAuth();
-  const [error, setError] = useState("");
-  const [success, setSuccess] = useState("");
-  const [loading, setLoading] = useState(false);
+  const [startDate, setStartDate] = useState(null);
+  const [endDate, setEndDate] = useState(null);
   const [contracts, setContracts] = useState([]);
   const [selectedContract, setSelectedContract] = useState(null);
-  const [detailDialogOpen, setDetailDialogOpen] = useState(false);
+  const [openDialog, setOpenDialog] = useState(false);
+  const [error, setError] = useState("");
 
-  const [searchParams, setSearchParams] = useState({
-    contractType: "",
-    contractNumber: "",
-    contractName: "",
-    status: "",
-    startDate: startOfMonth(new Date()),
-    endDate: endOfMonth(new Date()),
-  });
+  const handleQuery = async () => {
+    if (!startDate || !endDate) {
+      setError("請選擇起始日期和結束日期");
+      return;
+    }
 
-  const columns = [
-    { field: "contractNumber", headerName: "合約編號", width: 150 },
-    { field: "contractName", headerName: "合約名稱", width: 200 },
-    { field: "contractType", headerName: "合約類型", width: 120 },
-    { field: "contractParty", headerName: "合約方", width: 150 },
-    {
-      field: "contractDate",
-      headerName: "合約日期",
-      width: 120,
-      valueFormatter: (params) => format(new Date(params.value), "yyyy/MM/dd"),
-    },
-    {
-      field: "contractAmount",
-      headerName: "合約金額",
-      width: 120,
-      valueFormatter: (params) => `NT$ ${params.value.toLocaleString()}`,
-    },
-    { field: "status", headerName: "狀態", width: 100 },
-    {
-      field: "actions",
-      headerName: "操作",
-      width: 120,
-      renderCell: (params) => (
-        <Button
-          variant="outlined"
-          size="small"
-          onClick={() => handleViewDetails(params.row)}
-        >
-          查看詳情
-        </Button>
-      ),
-    },
-  ];
-
-  const handleSearch = async () => {
-    setLoading(true);
-    setError("");
     try {
-      // TODO: 实现合约查询逻辑
-      // 模拟数据
-      const mockData = [
+      const response = await axios.post(
+        "https://cloud.servtech.com.tw:35678/webhook-test/1a02ada6-cca4-4146-a527-7f47a7e09a31",
         {
-          id: 1,
-          contractNumber: "C2024001",
-          contractName: "測試合約1",
-          contractType: "採購合約",
-          contractParty: "測試公司",
-          contractDate: new Date(),
-          contractAmount: 100000,
-          status: "待審核",
-        },
-      ];
-      setContracts(mockData);
+          startDate: format(startDate, "yyyy/MM/dd"),
+          endDate: format(endDate, "yyyy/MM/dd"),
+        }
+      );
+
+      if (response.data) {
+        setContracts(response.data);
+        setError("");
+      }
     } catch (err) {
-      setError(err.response?.data?.message || "查詢失敗，請稍後重試");
-    } finally {
-      setLoading(false);
+      setError("查詢失敗，請稍後重試");
     }
   };
 
   const handleViewDetails = (contract) => {
     setSelectedContract(contract);
-    setDetailDialogOpen(true);
+    setOpenDialog(true);
   };
 
-  useEffect(() => {
-    handleSearch();
-  }, []);
+  const getContractStatus = (contract) => {
+    return contract.合約編號 ? "已成立" : "申請中";
+  };
+
+  const getContractYear = (contract) => {
+    if (!contract.合約編號) return "";
+    const match = contract.合約編號.match(/\((\d{3})\)/);
+    return match ? match[1] : "";
+  };
 
   return (
     <LocalizationProvider dateAdapter={AdapterDateFns}>
@@ -120,103 +81,28 @@ const ContractQuery = () => {
           </Typography>
 
           <Grid container spacing={2} sx={{ mb: 3 }}>
-            <Grid item xs={12} md={2}>
-              <TextField
-                select
-                label="合約類型"
-                value={searchParams.contractType}
-                onChange={(e) =>
-                  setSearchParams({
-                    ...searchParams,
-                    contractType: e.target.value,
-                  })
-                }
-                fullWidth
-              >
-                <MenuItem value="">全部</MenuItem>
-                {CONTRACT_TYPES.map((type) => (
-                  <MenuItem key={type} value={type}>
-                    {type}
-                  </MenuItem>
-                ))}
-              </TextField>
-            </Grid>
-
-            <Grid item xs={12} md={2}>
-              <TextField
-                label="合約編號"
-                value={searchParams.contractNumber}
-                onChange={(e) =>
-                  setSearchParams({
-                    ...searchParams,
-                    contractNumber: e.target.value,
-                  })
-                }
-                fullWidth
-              />
-            </Grid>
-
-            <Grid item xs={12} md={2}>
-              <TextField
-                label="合約名稱"
-                value={searchParams.contractName}
-                onChange={(e) =>
-                  setSearchParams({
-                    ...searchParams,
-                    contractName: e.target.value,
-                  })
-                }
-                fullWidth
-              />
-            </Grid>
-
-            <Grid item xs={12} md={2}>
-              <TextField
-                select
-                label="狀態"
-                value={searchParams.status}
-                onChange={(e) =>
-                  setSearchParams({ ...searchParams, status: e.target.value })
-                }
-                fullWidth
-              >
-                <MenuItem value="">全部</MenuItem>
-                {CONTRACT_STATUS.map((status) => (
-                  <MenuItem key={status} value={status}>
-                    {status}
-                  </MenuItem>
-                ))}
-              </TextField>
-            </Grid>
-
-            <Grid item xs={12} md={2}>
+            <Grid item xs={12} md={4}>
               <DatePicker
-                label="開始日期"
-                value={searchParams.startDate}
-                onChange={(date) =>
-                  setSearchParams({ ...searchParams, startDate: date })
-                }
+                label="起始日期"
+                value={startDate}
+                onChange={setStartDate}
                 slotProps={{ textField: { fullWidth: true } }}
               />
             </Grid>
-
-            <Grid item xs={12} md={2}>
+            <Grid item xs={12} md={4}>
               <DatePicker
                 label="結束日期"
-                value={searchParams.endDate}
-                onChange={(date) =>
-                  setSearchParams({ ...searchParams, endDate: date })
-                }
+                value={endDate}
+                onChange={setEndDate}
                 slotProps={{ textField: { fullWidth: true } }}
               />
             </Grid>
-
-            <Grid item xs={12}>
+            <Grid item xs={12} md={4}>
               <Button
                 variant="contained"
-                color="primary"
-                onClick={handleSearch}
-                disabled={loading}
+                onClick={handleQuery}
+                fullWidth
+                sx={{ height: "56px" }}
               >
                 查詢
               </Button>
@@ -224,75 +110,83 @@ const ContractQuery = () => {
           </Grid>
 
           {error && (
-            <Alert severity="error" sx={{ mb: 2 }}>
+            <Typography color="error" sx={{ mb: 2 }}>
               {error}
-            </Alert>
+            </Typography>
           )}
 
-          <div style={{ height: 400, width: "100%" }}>
-            <DataGrid
-              rows={contracts}
-              columns={columns}
-              pageSize={5}
-              rowsPerPageOptions={[5, 10, 20]}
-              loading={loading}
-              disableSelectionOnClick
-            />
-          </div>
-        </Paper>
+          <TableContainer>
+            <Table>
+              <TableHead>
+                <TableRow>
+                  <TableCell>合約編號</TableCell>
+                  <TableCell>年度</TableCell>
+                  <TableCell>簽約廠商名稱</TableCell>
+                  <TableCell>合約類型</TableCell>
+                  <TableCell>合約名稱</TableCell>
+                  <TableCell>合約起始日期</TableCell>
+                  <TableCell>合約結束日期</TableCell>
+                  <TableCell>金額(未稅)</TableCell>
+                  <TableCell>申請人</TableCell>
+                  <TableCell>狀態</TableCell>
+                  <TableCell>內容</TableCell>
+                </TableRow>
+              </TableHead>
+              <TableBody>
+                {contracts.map((contract, index) => (
+                  <TableRow key={index}>
+                    <TableCell>{contract.data.合約編號 || "-"}</TableCell>
+                    <TableCell>{getContractYear(contract.data)}</TableCell>
+                    <TableCell>{contract.data.簽約廠商名稱 || "-"}</TableCell>
+                    <TableCell>{contract.data.合約類型}</TableCell>
+                    <TableCell>{contract.data.合約名稱}</TableCell>
+                    <TableCell>{contract.data.合約起始日期}</TableCell>
+                    <TableCell>{contract.data.合約結束日期}</TableCell>
+                    <TableCell>
+                      {contract.data["合約金額(未稅)"] || "-"}
+                    </TableCell>
+                    <TableCell>{contract.data.申請人}</TableCell>
+                    <TableCell>{getContractStatus(contract.data)}</TableCell>
+                    <TableCell>
+                      <IconButton
+                        onClick={() => handleViewDetails(contract.data)}
+                        size="small"
+                      >
+                        <InfoIcon />
+                      </IconButton>
+                    </TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          </TableContainer>
 
-        <Dialog
-          open={detailDialogOpen}
-          onClose={() => setDetailDialogOpen(false)}
-          maxWidth="md"
-          fullWidth
-        >
-          <DialogTitle>合約詳情</DialogTitle>
-          <DialogContent>
-            {selectedContract && (
-              <Grid container spacing={2} sx={{ mt: 1 }}>
-                <Grid item xs={12} md={6}>
-                  <Typography variant="subtitle2">合約編號</Typography>
-                  <Typography>{selectedContract.contractNumber}</Typography>
+          <Dialog
+            open={openDialog}
+            onClose={() => setOpenDialog(false)}
+            maxWidth="md"
+            fullWidth
+          >
+            <DialogTitle>合約詳細內容</DialogTitle>
+            <DialogContent dividers>
+              {selectedContract && (
+                <Grid container spacing={2}>
+                  {Object.entries(selectedContract).map(([key, value]) => (
+                    <Grid item xs={12} md={6} key={key}>
+                      <Typography variant="subtitle2" color="textSecondary">
+                        {key}:
+                      </Typography>
+                      <Typography variant="body1">{value || "-"}</Typography>
+                    </Grid>
+                  ))}
                 </Grid>
-                <Grid item xs={12} md={6}>
-                  <Typography variant="subtitle2">合約名稱</Typography>
-                  <Typography>{selectedContract.contractName}</Typography>
-                </Grid>
-                <Grid item xs={12} md={6}>
-                  <Typography variant="subtitle2">合約類型</Typography>
-                  <Typography>{selectedContract.contractType}</Typography>
-                </Grid>
-                <Grid item xs={12} md={6}>
-                  <Typography variant="subtitle2">合約方</Typography>
-                  <Typography>{selectedContract.contractParty}</Typography>
-                </Grid>
-                <Grid item xs={12} md={6}>
-                  <Typography variant="subtitle2">合約日期</Typography>
-                  <Typography>
-                    {format(
-                      new Date(selectedContract.contractDate),
-                      "yyyy/MM/dd"
-                    )}
-                  </Typography>
-                </Grid>
-                <Grid item xs={12} md={6}>
-                  <Typography variant="subtitle2">合約金額</Typography>
-                  <Typography>
-                    NT$ {selectedContract.contractAmount.toLocaleString()}
-                  </Typography>
-                </Grid>
-                <Grid item xs={12} md={6}>
-                  <Typography variant="subtitle2">狀態</Typography>
-                  <Typography>{selectedContract.status}</Typography>
-                </Grid>
-              </Grid>
-            )}
-          </DialogContent>
-          <DialogActions>
-            <Button onClick={() => setDetailDialogOpen(false)}>關閉</Button>
-          </DialogActions>
-        </Dialog>
+              )}
+            </DialogContent>
+            <DialogActions>
+              <Button onClick={() => setOpenDialog(false)}>關閉</Button>
+            </DialogActions>
+          </Dialog>
+        </Paper>
       </Box>
     </LocalizationProvider>
   );
