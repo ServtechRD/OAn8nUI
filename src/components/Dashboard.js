@@ -93,10 +93,10 @@ const Dashboard = () => {
         anchor="left"
         open={open}
         sx={{
-          width: drawerWidth,
+          width: open ? drawerWidth : 0,
           flexShrink: 0,
           "& .MuiDrawer-paper": {
-            width: drawerWidth,
+            width: open ? drawerWidth : 0,
             boxSizing: "border-box",
             marginTop: "64px",
           },
@@ -180,14 +180,14 @@ const Dashboard = () => {
         sx={{
           flexGrow: 1,
           p: 3,
-          width: open ? `calc(100% - ${drawerWidth}px)` : "100%",
-          marginLeft: open ? `24px` : 0,
+          width: `calc(100% - ${open ? drawerWidth : 0}px)`,
+          marginLeft: open ? `${drawerWidth}px` : 0,
           marginRight: 0,
           marginTop: "64px",
           transition: (theme) =>
             theme.transitions.create(["margin", "width"], {
               easing: theme.transitions.easing.sharp,
-              duration: theme.transitions.duration.leavingScreen,
+              duration: theme.transitions.duration.enteringScreen,
             }),
           display: "flex",
           justifyContent: "flex-end",
