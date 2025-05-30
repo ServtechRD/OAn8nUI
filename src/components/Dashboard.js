@@ -79,6 +79,16 @@ const Dashboard = () => {
           >
             <MenuIcon />
           </IconButton>
+          <Box
+            component="img"
+            src="/assets/images/small_logo.png"
+            alt="公司 Logo"
+            sx={{
+              height: 40,
+              width: "auto",
+              mr: 2,
+            }}
+          />
           <Typography variant="h6" noWrap component="div" sx={{ flexGrow: 1 }}>
             {user?.姓名} - {user?.職稱}
           </Typography>
