@@ -180,17 +180,21 @@ const Dashboard = () => {
         sx={{
           flexGrow: 1,
           p: 3,
-          width: open ? `calc(100% - ${drawerWidth}px)` : "100%",
-          marginLeft: open ? `24px` : 0,
+          width: `calc(100% - ${drawerWidth}px)`,
+          marginLeft: `${drawerWidth}px`,
+          marginRight: "24px",
           marginTop: "64px",
           transition: (theme) =>
             theme.transitions.create(["margin", "width"], {
               easing: theme.transitions.easing.sharp,
               duration: theme.transitions.duration.leavingScreen,
             }),
-          maxWidth: "100%",
-          position: "relative",
-          left: open ? 0 : `-${drawerWidth}px`,
+          display: "flex",
+          justifyContent: "flex-end",
+          "& > *": {
+            width: "100%",
+            maxWidth: "100%",
+          },
         }}
       >
         {renderContent()}
