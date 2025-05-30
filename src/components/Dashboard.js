@@ -180,9 +180,9 @@ const Dashboard = () => {
         sx={{
           flexGrow: 1,
           p: 3,
-          width: `calc(100% - ${drawerWidth}px)`,
-          marginLeft: `${drawerWidth}px`,
-          marginRight: "24px",
+          width: open ? `calc(100% - ${drawerWidth}px)` : "100%",
+          marginLeft: open ? `24px` : 0,
+          marginRight: 0,
           marginTop: "64px",
           transition: (theme) =>
             theme.transitions.create(["margin", "width"], {
