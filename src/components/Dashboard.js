@@ -96,7 +96,7 @@ const Dashboard = () => {
           width: open ? drawerWidth : 0,
           flexShrink: 0,
           "& .MuiDrawer-paper": {
-            width: open ? drawerWidth : 0,
+            width: drawerWidth,
             boxSizing: "border-box",
             marginTop: "64px",
           },
@@ -181,7 +181,7 @@ const Dashboard = () => {
           flexGrow: 1,
           p: 3,
           width: `calc(100% - ${open ? drawerWidth : 0}px)`,
-          marginLeft: open ? `${drawerWidth}px` : 0,
+          marginLeft: open ? `24px` : 0,
           marginRight: 0,
           marginTop: "64px",
           transition: (theme) =>
