@@ -28,7 +28,7 @@ const Login = () => {
         setError(result.message);
       }
     } catch (err) {
-      setError("登录过程中发生错误");
+      setError("登入過程中發生錯誤");
     } finally {
       setLoading(false);
     }
@@ -44,6 +44,16 @@ const Login = () => {
           alignItems: "center",
         }}
       >
+        <Box
+          component="img"
+          src="/assets/images/full_logo.png"
+          alt="公司 Logo"
+          sx={{
+            width: 200,
+            height: "auto",
+            mb: 4,
+          }}
+        />
         <Paper
           elevation={3}
           sx={{
@@ -55,7 +65,7 @@ const Login = () => {
           }}
         >
           <Typography component="h1" variant="h5">
-            登录
+            登入
           </Typography>
           {error && (
             <Alert severity="error" sx={{ width: "100%", mt: 2 }}>
@@ -68,7 +78,7 @@ const Login = () => {
               required
               fullWidth
               id="username"
-              label="用户名"
+              label="帳號"
               name="username"
               autoComplete="username"
               autoFocus
@@ -81,7 +91,7 @@ const Login = () => {
               required
               fullWidth
               name="password"
-              label="密码"
+              label="密碼"
               type="password"
               id="password"
               autoComplete="current-password"
@@ -96,7 +106,7 @@ const Login = () => {
               sx={{ mt: 3, mb: 2 }}
               disabled={loading}
             >
-              {loading ? "登录中..." : "登录"}
+              {loading ? "登入中..." : "登入"}
             </Button>
           </Box>
         </Paper>
