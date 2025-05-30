@@ -1,9 +1,9 @@
 {
-  "short_name": "OAn8n",
-  "name": "OAn8n 系統",
+  "short_name": "office system",
+  "name": "行政系統",
   "icons": [],
   "start_url": ".",
   "display": "standalone",
   "theme_color": "#1976D2",
   "background_color": "#ffffff"
-} 
+}
