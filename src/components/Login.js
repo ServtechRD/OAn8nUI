@@ -38,22 +38,12 @@ const Login = () => {
     <Container component="main" maxWidth="xs">
       <Box
         sx={{
-          marginTop: 8,
+          marginTop: 4,
           display: "flex",
           flexDirection: "column",
           alignItems: "center",
         }}
       >
-        <Box
-          component="img"
-          src="/assets/images/full_logo.png"
-          alt="公司 Logo"
-          sx={{
-            width: 200,
-            height: "auto",
-            mb: 4,
-          }}
-        />
         <Paper
           elevation={3}
           sx={{
@@ -64,15 +54,25 @@ const Login = () => {
             width: "100%",
           }}
         >
-          <Typography component="h1" variant="h5">
-            登入
+          <Box
+            component="img"
+            src="/assets/images/full_logo.png"
+            alt="公司 Logo"
+            sx={{
+              width: 280,
+              height: "auto",
+              mb: 3,
+            }}
+          />
+          <Typography component="h1" variant="h5" sx={{ mb: 3 }}>
+            行政系統
           </Typography>
           {error && (
-            <Alert severity="error" sx={{ width: "100%", mt: 2 }}>
+            <Alert severity="error" sx={{ width: "100%", mb: 2 }}>
               {error}
             </Alert>
           )}
-          <Box component="form" onSubmit={handleSubmit} sx={{ mt: 1 }}>
+          <Box component="form" onSubmit={handleSubmit} sx={{ width: "100%" }}>
             <TextField
               margin="normal"
               required
