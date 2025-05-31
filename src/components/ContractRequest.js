@@ -228,19 +228,18 @@ const ContractRequest = () => {
         formData.append("file", file);
         formData.append("tag", JSON.stringify(["合約", "行政", "用印"]));
         formData.append("description", "合約用印");
-        formData.append("user_id", Number(user?.JarvisUserID) || 0);
         formData.append("service", user?.JarvisService || "");
 
+        // 構建帶有 user_id 的 URL
+        const userId = Number(user?.JarvisUserID) || 0;
+        const uploadUrl = `http://192.168.1.235:48000/upload/single?user_id=${userId}`;
+
         // 上傳檔案
-        const response = await axios.post(
-          "http://192.168.1.235:48000/upload/single",
-          formData,
-          {
-            headers: {
-              "Content-Type": "multipart/form-data",
-            },
-          }
-        );
+        const response = await axios.post(uploadUrl, formData, {
+          headers: {
+            "Content-Type": "multipart/form-data",
+          },
+        });
 
         if (response.data && response.data.fileUrl) {
           // 更新表單數據，保存檔案名稱和 URL
