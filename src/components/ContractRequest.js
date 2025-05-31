@@ -219,6 +219,46 @@ const ContractRequest = () => {
     return termNumber <= maxTerms;
   };
 
+  const handleFileChange = async (e) => {
+    const file = e.target.files[0];
+    if (file) {
+      try {
+        // 創建 FormData 對象
+        const formData = new FormData();
+        formData.append("file", file);
+        formData.append("tag", JSON.stringify(["合約", "行政", "用印"]));
+        formData.append("description", "合約用印");
+        formData.append("user", user?.JarvisUserID || "");
+        formData.append("service", user?.JarvisService || "");
+
+        // 上傳檔案
+        const response = await axios.post(
+          "http://192.168.1.235:48000/upload/single",
+          formData,
+          {
+            headers: {
+              "Content-Type": "multipart/form-data",
+            },
+          }
+        );
+
+        if (response.data && response.data.fileUrl) {
+          // 更新表單數據，保存檔案名稱和 URL
+          setFormData((prev) => ({
+            ...prev,
+            請上傳合約電子檔: response.data.fileUrl,
+          }));
+        } else {
+          setError("檔案上傳失敗：未收到檔案 URL");
+        }
+      } catch (err) {
+        setError(
+          "檔案上傳失敗：" + (err.response?.data?.message || err.message)
+        );
+      }
+    }
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError("");
@@ -227,6 +267,12 @@ const ContractRequest = () => {
     // 验证总占比
     if (totalPercentage > 100) {
       setError("合約占比總和不能超過100%");
+      return;
+    }
+
+    // 验证是否已上传文件
+    if (!formData.請上傳合約電子檔) {
+      setError("請先上傳合約電子檔");
       return;
     }
 
@@ -282,16 +328,6 @@ const ContractRequest = () => {
       }
     } catch (err) {
       setError(err.response?.data?.message || "提交失敗，請稍後重試");
-    }
-  };
-
-  const handleFileChange = (e) => {
-    const file = e.target.files[0];
-    if (file) {
-      setFormData({
-        ...formData,
-        請上傳合約電子檔: file.name,
-      });
     }
   };
 
@@ -437,8 +473,11 @@ const ContractRequest = () => {
                     <input type="file" hidden onChange={handleFileChange} />
                   </Button>
                   {formData.請上傳合約電子檔 && (
-                    <Typography variant="body2" sx={{ mt: 1 }}>
-                      已選擇檔案: {formData.請上傳合約電子檔}
+                    <Typography
+                      variant="body2"
+                      sx={{ mt: 1, color: "success.main" }}
+                    >
+                      檔案已上傳成功
                     </Typography>
                   )}
                 </Grid>
