@@ -241,11 +241,12 @@ const ContractRequest = () => {
           },
         });
 
-        if (response.data && response.data.fileUrl) {
+        if (response.data && response.data.document_url) {
+          console.log(response.data);
           // 更新表單數據，保存檔案名稱和 URL
           setFormData((prev) => ({
             ...prev,
-            請上傳合約電子檔: response.data.fileUrl,
+            請上傳合約電子檔: response.data.document_url,
           }));
         } else {
           setError("檔案上傳失敗：未收到檔案 URL");
