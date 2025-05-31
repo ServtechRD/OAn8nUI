@@ -228,7 +228,7 @@ const ContractRequest = () => {
         formData.append("file", file);
         formData.append("tag", JSON.stringify(["合約", "行政", "用印"]));
         formData.append("description", "合約用印");
-        formData.append("user", user?.JarvisUserID || "");
+        formData.append("user_id", user?.JarvisUserID || "");
         formData.append("service", user?.JarvisService || "");
 
         // 上傳檔案
